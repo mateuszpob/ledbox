@@ -22,7 +22,7 @@ void setup() {
 
     // Włączenie przerwań od zmiany stanu pinów (PCINT)
     GIMSK |= (1 << PCIE);        // Włącz przerwania dla PCINT
-    PCMSK |= (1 << SW0_PIN) | (1 << SW1_PIN); // Włącz przerwanie dla PB4 i PB3
+    PCMSK |= (1 << SW1_PIN); // Włącz przerwanie dla PB4 i PB3
     sei();  // Globalne włączenie przerwań
 }
 
@@ -39,7 +39,12 @@ int main() {
     setup();
 
     while (1) {
-        // Nic nie robimy, obsługa przycisków odbywa się w przerwaniach
+        
+        if (!(PINB & (1 << SW0_PIN))) {
+            PORTB &= ~(1 << RED_PIN); // Wyłącz czerwoną diodę
+        } else {
+            PORTB |= (1 << RED_PIN);  // Włącz czerwoną diodę
+        }
     }
 }
 
@@ -48,15 +53,10 @@ ISR(PCINT0_vect) {
     // Debounce - krótka zwłoka
     delay_ms(50);
     
-    if (!(PINB & (1 << SW0_PIN))) { // Jeśli SW0 (PB4) wciśnięty
-        red_state ^= 1; // Zmiana stanu (toggle)
-        if (red_state) PORTB |= (1 << RED_PIN); // Włącz czerwoną diodę
-        else PORTB &= ~(1 << RED_PIN); // Wyłącz czerwoną diodę
-    }
-
     if (!(PINB & (1 << SW1_PIN))) { // Jeśli SW1 (PB3) wciśnięty
         blue_state ^= 1; // Zmiana stanu (toggle)
         if (blue_state) PORTB |= (1 << BLUE_PIN); // Włącz niebieską diodę
         else PORTB &= ~(1 << BLUE_PIN); // Wyłącz niebieską diodę
     }
 }
+
