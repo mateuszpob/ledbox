@@ -35,7 +35,10 @@ void setup() {
 }
 
 void fade(uint16_t total_time, float easing_factor) {
-    uint16_t steps = 255;
+        TCCR0A = (1 << WGM00) | (1 << WGM01) | (1 << COM0A1); // Fast PWM, wyjście na OC0A
+    TCCR0B = (1 << CS01); // Preskaler 8
+
+    uint16_t steps = 64;
     uint16_t delay_per_step = total_time / steps;
 
     for (uint16_t i = 0; i < steps; i++) {
@@ -73,8 +76,8 @@ int main() {
 
     while (1) {
         if (fade_active) {
-            fade(1000, 2.0);
-            // fade_active = 0; // Zapobiega wielokrotnemu uruchamianiu w pętli
+            fade(256, 2.0);
+            fade_active = 0; // Zapobiega wielokrotnemu uruchamianiu w pętli
         }
     }
 }
