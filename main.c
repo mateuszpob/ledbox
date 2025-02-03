@@ -29,10 +29,6 @@ void setup() {
     DDRB &= ~((1 << SW0_PIN) | (1 << SW1_PIN));
     PORTB |= (1 << SW0_PIN) | (1 << SW1_PIN);
 
-    // Konfiguracja PWM dla RED_PIN (PB0) - Timer0
-    TCCR0A = (1 << WGM00) | (1 << WGM01) | (1 << COM0A1); // Fast PWM, wyjście na OC0A (PB0)
-    TCCR0B = (1 << CS01); // Preskaler 8
-
     // Włączenie przerwań od zmiany stanu pinów (PCINT)
     GIMSK |= (1 << PCIE);        // Włącz przerwania dla PCINT
     PCMSK |= (1 << SW0_PIN) | (1 << SW1_PIN); // Włącz przerwanie dla PB4 i PB3
@@ -64,11 +60,11 @@ int main() {
 // Przerwanie od zmiany stanu na pinach
 ISR(PCINT0_vect) {
     // Debounce - krótka zwłoka
-    delay_ms(50);
+    delay_ms(200);
     
     if (!(PINB & (1 << SW0_PIN))) { // Jeśli SW0 (PB4) wciśnięty
         red_state ^= 1; // Zmiana stanu (toggle)
-        if (red_state) fade(100, 2.0); // Włącz czerwoną diodę
+        if (red_state) PORTB |= (1 << RED_PIN); // Włącz czerwoną diodę
         else PORTB &= ~(1 << RED_PIN); // Wyłącz czerwoną diodę
     }
 
